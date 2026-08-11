@@ -43,15 +43,15 @@ The owner explicitly authorized uninterrupted autonomous execution across milest
 ## Verification
 
 - `go test -work ./...`, `go vet ./...`, `go mod verify`, and a trimmed production binary build pass with Go 1.26.5 (module minimum Go 1.25).
-- `govulncheck ./...` reports zero reachable Go vulnerabilities after upgrading `go-mail` and `x/text` to fixed versions.
+- `govulncheck ./...` reports zero reachable Go vulnerabilities after upgrading `go-mail`, `x/crypto`, and `x/text`; Docker Scout reports zero critical/high findings in the final image.
 - Frontend TypeScript checks, 6 Vitest crypto/fragment tests, and the Vite 8 production build pass.
 - Playwright 1.62 completes owner setup → encrypted vault → Recovery Kits → scaled deadline release through SMTP/Mailpit → recipient share reconstruction → plaintext display.
 - Full and production-only npm audits report zero vulnerabilities for both `web` and `e2e` lockfiles.
-- Production and development Compose files pass `docker compose config --quiet` validation.
+- Production and development Compose files pass `docker compose config --quiet` validation. The production image builds locally, runs as the unprivileged `afterwords` user with a read-only root filesystem/capabilities dropped, and serves both `/healthz` and the embedded SPA.
 
 ## Known limitations
 
-- This Windows host had no usable Docker daemon, so image construction and a fresh-VM deployment were not executed locally. Compose files parse successfully, and CI includes a production multi-stage image build plus non-root, health, and embedded-SPA smoke checks.
+- The local container smoke covered Linux/amd64. Other architectures are produced and checked by the release/CI configuration but were not executed on physical arm64 hardware in this audit.
 - The real scaled deadline → SMTP/Mailpit → recipient recovery flow passed locally with portable Mailpit. Deterministic fake-clock tests additionally cover the state-machine boundaries.
 - The complete application has not received an independent cryptographic audit. The Shamir dependency has independent Cure53 and Zellic audits; the web-delivery trust limitation is documented in `SECURITY.md`.
 
