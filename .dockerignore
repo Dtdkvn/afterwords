@@ -7,9 +7,11 @@ dist
 e2e
 node_modules
 web/node_modules
+web/.npm-cache
 web/coverage
 web/dist
 internal/server/webdist
+.tools
 *.log
 *.tmp
 .DS_Store

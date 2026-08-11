@@ -33,6 +33,15 @@ Open [http://localhost:8080](http://localhost:8080), create the single owner acc
 
 The default stack starts without a real SMTP server. Configure the `SMTP_*` variables before relying on reminders or releases; use the bundled Mailpit demo for a fully local test.
 
+On a development network that inspects TLS, pass its trusted root to BuildKit as a secret instead of copying it into the image or repository:
+
+```bash
+docker build --secret id=afterwords_ca,src=/path/to/corporate-root.pem -t afterwords:local .
+docker compose up --no-build
+```
+
+The secret is mounted only for dependency installation and is absent from the resulting layers. Ordinary networks should keep using `docker compose up --build` without this option.
+
 ## How it works
 
 ```mermaid

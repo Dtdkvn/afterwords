@@ -87,6 +87,10 @@ The durable outbox provides retry and auditability, not guaranteed delivery. Mon
 7. Run a complete fire drill after setup, upgrades, SMTP changes, restores, and trustee changes.
 8. Rebuild from tagged source and verify published checksums for high-assurance deployments.
 
+### TLS-inspecting build networks
+
+The Dockerfile accepts a private development root only through the optional BuildKit secret `afterwords_ca`. Use `docker build --secret id=afterwords_ca,src=/path/to/root.pem -t afterwords:local .`; the certificate is available only to `apk`, npm, and Go dependency-download steps and is not copied into an image layer. Do not add private roots to the repository, pass them as build arguments, or disable TLS verification. This facility changes build-time trust only; the runtime image retains its normal public CA bundle.
+
 ## Explicit non-guarantees
 
 Afterwords does not protect against:
