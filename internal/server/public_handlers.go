@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/afterwords/afterwords/internal/store"
 	"github.com/go-chi/chi/v5"
+	"github.com/yewud/afterwords/internal/store"
 )
 
 func (s *Server) magicCheckinConfirmation(w http.ResponseWriter, r *http.Request) {

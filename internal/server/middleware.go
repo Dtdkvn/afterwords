@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/afterwords/afterwords/internal/clock"
+	"github.com/yewud/afterwords/internal/clock"
 )
 
 func (s *Server) securityHeaders(next http.Handler) http.Handler {

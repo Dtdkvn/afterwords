@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/afterwords/afterwords/internal/model"
+	"github.com/yewud/afterwords/internal/model"
 )
 
 // EnqueueMessage appends mail to the durable outbox.

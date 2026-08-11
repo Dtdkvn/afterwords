@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/afterwords/afterwords/internal/mail"
-	"github.com/afterwords/afterwords/internal/model"
-	"github.com/afterwords/afterwords/internal/store"
 	"github.com/go-chi/chi/v5"
+	"github.com/yewud/afterwords/internal/mail"
+	"github.com/yewud/afterwords/internal/model"
+	"github.com/yewud/afterwords/internal/store"
 )
 
 type switchInput struct {

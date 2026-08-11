@@ -33,7 +33,9 @@ archives:
       - LICENSE
       - README.md
       - SECURITY.md
+      - CONTRIBUTING.md
       - .env.example
+      - scripts/record-demo.md
 
 checksum:
   name_template: checksums.txt

@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/afterwords/afterwords/internal/auth"
-	"github.com/afterwords/afterwords/internal/clock"
-	"github.com/afterwords/afterwords/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/yewud/afterwords/internal/auth"
+	"github.com/yewud/afterwords/internal/clock"
+	"github.com/yewud/afterwords/internal/store"
 )
 
 const sessionCookie = "afterwords_session"

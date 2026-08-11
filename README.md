@@ -22,12 +22,12 @@ Check in periodically. If you stay silent past your deadline and grace period, A
 ## Quick start
 
 ```bash
-git clone https://github.com/YOUR_GITHUB_USERNAME/afterwords.git
+git clone https://github.com/yewud/afterwords.git
 cd afterwords
 docker compose up --build
 ```
 
-Replace `YOUR_GITHUB_USERNAME` with the repository owner after publishing this local build; no public remote is created automatically.
+This local checkout is prepared for the expected publication path `https://github.com/yewud/afterwords`; no public remote is created or pushed automatically.
 
 Open [http://localhost:8080](http://localhost:8080), create the single owner account, and follow the setup wizard. The SQLite database lives in the `afterwords-data` Docker volume.
 

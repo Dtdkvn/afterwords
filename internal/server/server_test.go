@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/afterwords/afterwords/internal/clock"
-	"github.com/afterwords/afterwords/internal/store"
+	"github.com/yewud/afterwords/internal/clock"
+	"github.com/yewud/afterwords/internal/store"
 )
 
 func TestCiphertextOnlyVaultAPIAndCheckin(t *testing.T) {

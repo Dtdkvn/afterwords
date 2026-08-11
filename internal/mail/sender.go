@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/afterwords/afterwords/internal/store"
 	mailclient "github.com/wneessen/go-mail"
+	"github.com/yewud/afterwords/internal/store"
 )
 
 // Sender drains the SQLite outbox and retries transient failures.

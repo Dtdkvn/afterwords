@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/afterwords/afterwords/internal/clock"
-	"github.com/afterwords/afterwords/migrations"
+	"github.com/yewud/afterwords/internal/clock"
+	"github.com/yewud/afterwords/migrations"
 	_ "modernc.org/sqlite"
 )
 

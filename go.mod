@@ -1,4 +1,4 @@
-module github.com/afterwords/afterwords
+module github.com/yewud/afterwords
 
 go 1.25.0
 

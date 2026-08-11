@@ -6,9 +6,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/afterwords/afterwords/internal/mail"
-	"github.com/afterwords/afterwords/internal/model"
 	"github.com/go-chi/chi/v5"
+	"github.com/yewud/afterwords/internal/mail"
+	"github.com/yewud/afterwords/internal/model"
 )
 
 var fingerprintPattern = regexp.MustCompile(`^[a-f0-9]{64}$`)

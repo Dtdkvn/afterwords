@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/afterwords/afterwords/internal/model"
+	"github.com/yewud/afterwords/internal/model"
 )
 
 // BeginReleaseIfReady moves an overdue switch into RELEASING only when its

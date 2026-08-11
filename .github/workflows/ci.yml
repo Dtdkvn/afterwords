@@ -86,6 +86,10 @@ jobs:
           version: v2.17.1
           args: release --snapshot --clean
 
+      - name: Verify packaged README targets
+        shell: bash
+        run: bash scripts/check-release-archives.sh dist
+
   e2e:
     runs-on: ubuntu-24.04
     timeout-minutes: 20

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/afterwords/afterwords/internal/auth"
-	"github.com/afterwords/afterwords/internal/store"
+	"github.com/yewud/afterwords/internal/auth"
+	"github.com/yewud/afterwords/internal/store"
 )
 
 const sessionTTL = 30 * 24 * time.Hour

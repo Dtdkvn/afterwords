@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/afterwords/afterwords/internal/model"
+	"github.com/yewud/afterwords/internal/model"
 )
 
 const vaultQuotaBytes int64 = 25 * 1024 * 1024

@@ -27,11 +27,13 @@ A contribution that weakens an invariant must not be merged, even if it makes a 
 Prerequisites are Go 1.25+, Node.js 24+, npm, GNU Make, Bash, standard POSIX utilities, `curl`, and Docker for Mailpit/demo tests. Windows contributors should use WSL or an equivalent environment with these tools.
 
 ```bash
-git clone https://github.com/YOUR_GITHUB_USERNAME/afterwords.git
+git clone https://github.com/yewud/afterwords.git
 cd afterwords
 make setup
 make test
 ```
+
+The URL above is the expected canonical publication path. This local build has no configured remote until the repository is explicitly created and pushed.
 
 Run the development stack with `make dev`. The UI is at `http://localhost:5173`, the API at `http://localhost:8080`, and Mailpit at `http://localhost:8025`.
 

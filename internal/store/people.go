@@ -6,7 +6,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/afterwords/afterwords/internal/model"
+	"github.com/yewud/afterwords/internal/model"
 )
 
 func (s *Store) AddRecipient(ctx context.Context, userID, switchID, name, email string) (model.Recipient, error) {
