@@ -49,4 +49,4 @@ demo: ## Run the accelerated-time demo scenario.
 clean: ## Remove generated build and test artifacts.
 	@case "$(PROJECT_ROOT)" in ""|/|[A-Za-z]:/) echo "Refusing to clean an unsafe project root: $(PROJECT_ROOT)" >&2; exit 1;; esac
 	@test -f "$(PROJECT_ROOT)/Makefile" && test -d "$(PROJECT_ROOT)/internal/server/webdist" || (echo "Refusing to clean outside an Afterwords checkout." >&2; exit 1)
-	rm -rf -- "$(PROJECT_ROOT)/bin" "$(PROJECT_ROOT)/internal/server/webdist/assets" "$(PROJECT_ROOT)/web/coverage" "$(PROJECT_ROOT)/e2e/test-results" "$(PROJECT_ROOT)/e2e/playwright-report"
+	rm -rf -- "$(PROJECT_ROOT)/bin" "$(PROJECT_ROOT)/dist" "$(PROJECT_ROOT)/web/coverage" "$(PROJECT_ROOT)/e2e/test-results" "$(PROJECT_ROOT)/e2e/playwright-report"
