@@ -1,0 +1,31 @@
+# Build outputs
+/afterwords
+/bin/
+/dist/
+/coverage/
+/web/dist/
+/web/coverage/
+/web/node_modules/
+/web/.npm-cache/
+/web/*.tsbuildinfo
+/web/vite.config.js
+/web/vite.config.d.ts
+/e2e/test-results/
+/e2e/playwright-report/
+/e2e/node_modules/
+/e2e/.npm-cache/
+/e2e/.pnpm-store/
+
+# Runtime data and local configuration
+*.db
+*.db-shm
+*.db-wal
+.env
+.tools/
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

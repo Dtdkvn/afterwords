@@ -1,0 +1,6 @@
+Afterwords — your check-in is waiting
+
+“{{.SwitchName}}” is now {{.DaysOverdue}} day(s) overdue. You still have time.
+Check in here: {{.CheckinURL}}
+
+Your encrypted messages remain private and unreleased.

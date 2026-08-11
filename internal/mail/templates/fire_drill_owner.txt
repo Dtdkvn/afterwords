@@ -1,0 +1,6 @@
+[TEST] Afterwords fire drill
+
+Your rehearsal for “{{.SwitchName}}” is ready.
+Only you received this email. The real switch state and deadline did not change.
+
+Practice here: {{.ReleaseURL}}

@@ -1,0 +1,6 @@
+Afterwords — a gentle check-in
+
+Your “{{.SwitchName}}” switch is due on {{.Deadline}}.
+Check in here: {{.CheckinURL}}
+
+Nothing has been released. This is only a reminder.

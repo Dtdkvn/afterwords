@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      mailpit:
+        image: axllent/mailpit:v1.30.7@sha256:d5ecbb067db3705fa953d79e1b7f81ef84038df67aba6c52825d8c02a1ea748a
+        ports:
+          - 1025:1025
+          - 8025:8025
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify release tag and main ancestry
+        shell: bash
+        run: |
+          [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]
+          git show-ref --verify --quiet refs/remotes/origin/main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: 1.26.x
+          cache: true
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            web/package-lock.json
+            e2e/package-lock.json
+
+      - name: Install frontend dependencies without release credentials
+        run: |
+          npm ci --prefix web
+          npm ci --prefix e2e
+
+      - name: Audit dependency graphs without release credentials
+        run: |
+          npm audit --prefix web --audit-level=low
+          npm audit --prefix e2e --audit-level=low
+
+      - name: Verify committed dependency manifests
+        run: |
+          go mod verify
+          go mod tidy
+          git diff --exit-code -- go.mod go.sum
+
+      - name: Check Go formatting
+        shell: bash
+        run: test -z "$(gofmt -l .)"
+
+      - name: Lint Go
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+        with:
+          version: v2.12.2
+
+      - name: Test release source
+        run: |
+          go test ./...
+          go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
+          npm test --prefix web
+
+      - name: Build embedded frontend without release credentials
+        run: npm run build --prefix web
+
+      - name: Install Chromium without release credentials
+        run: npm run install:browsers --prefix e2e
+
+      - name: Verify real deadline-to-email release flow
+        run: npm test --prefix e2e
+        env:
+          MAILPIT_URL: http://127.0.0.1:8025
+          SMTP_HOST: 127.0.0.1
+          SMTP_PORT: "1025"
+          SMTP_TLS_POLICY: none
+
+      - uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        with:
+          distribution: goreleaser
+          version: v2.17.1
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

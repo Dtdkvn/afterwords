@@ -1,0 +1,9 @@
+{{if .Test}}[TEST] {{end}}Afterwords
+
+Someone who cared about you left you something.
+
+Hello {{.RecipientName}},
+You were chosen to receive part of “{{.SwitchName}}”. Afterwords cannot read it.
+Open the guided page: {{.ReleaseURL}}
+
+Take your time. You do not need to install anything.

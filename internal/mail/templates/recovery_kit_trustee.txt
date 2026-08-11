@@ -1,0 +1,7 @@
+Afterwords — Recovery Kit instructions
+
+Hello {{.TrusteeName}},
+The owner of “{{.SwitchName}}” chose you to keep one recovery share safe.
+The owner will give you the share directly; Afterwords never receives it.
+
+Store the printed or downloaded kit somewhere private.

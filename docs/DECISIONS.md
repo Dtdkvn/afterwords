@@ -1,0 +1,19 @@
+# Architecture decisions
+
+## Zero-knowledge boundary
+
+The browser owns all vault cryptography. The backend accepts opaque ciphertext envelopes and metadata needed to schedule delivery. Recovery shares are transferred owner-to-trustee outside the server through print, local download, copy, or a locally rendered QR code. Share-bearing `mailto:` actions are excluded because mail clients and providers are outside the zero-knowledge boundary.
+
+The account login password is an authentication credential and is hashed server-side with Argon2id. It is intentionally separate from each vault passphrase, which never leaves the browser.
+
+## Reliable release
+
+Scheduler actions first claim a stable event key in SQLite. A unique constraint makes each reminder, recipient release, and trustee instruction idempotent. Email is committed to the durable outbox and delivered by a separate retrying worker. A state change and its audit record share one transaction.
+
+## Time
+
+Business logic receives a `Clock`. The scaled implementation maps real elapsed time to virtual elapsed time while preserving UTC. Scheduler and sender waits are real durations; all decisions and persisted timestamps come from the injected clock.
+
+## Browser-delivered cryptography
+
+The static application is compiled into the server binary and protected by a same-origin Content Security Policy. This meaningfully reduces supply-chain and third-party-script exposure, but does not prevent a malicious server binary from serving altered JavaScript. `SECURITY.md` documents this unavoidable limitation.

@@ -1,0 +1,7 @@
+Afterwords — your Recovery Kit is needed
+
+Hello {{.TrusteeName}},
+“{{.SwitchName}}” has reached its release point.
+Find the Recovery Kit you were given and open: {{.ReleaseURL}}
+
+Your share is combined only in the browser.

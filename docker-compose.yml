@@ -1,0 +1,43 @@
+name: afterwords
+
+services:
+  afterwords:
+    build:
+      context: .
+    image: afterwords:local
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${PORT:-8080}:${PORT:-8080}"
+    environment:
+      PORT: "${PORT:-8080}"
+      BASE_URL: "${BASE_URL:-http://localhost:8080}"
+      DB_PATH: /data/afterwords.db
+      SETUP_TOKEN: "${SETUP_TOKEN:-}"
+      SMTP_HOST: "${SMTP_HOST:-}"
+      SMTP_PORT: "${SMTP_PORT:-1025}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASS: "${SMTP_PASS:-}"
+      SMTP_FROM: "${SMTP_FROM:-Afterwords <afterwords@localhost>}"
+      SMTP_TLS_POLICY: "${SMTP_TLS_POLICY:-mandatory}"
+      TIME_SCALE: "${TIME_SCALE:-1}"
+      SECURE_COOKIES: "${SECURE_COOKIES:-false}"
+      TRUST_PROXY: "${TRUST_PROXY:-false}"
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+    volumes:
+      - afterwords-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:${PORT:-8080}/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  afterwords-data:

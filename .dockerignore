@@ -1,0 +1,15 @@
+.git
+.github
+.env
+afterwords.db*
+bin
+dist
+e2e
+node_modules
+web/node_modules
+web/coverage
+web/dist
+internal/server/webdist
+*.log
+*.tmp
+.DS_Store

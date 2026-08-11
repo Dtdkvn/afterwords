@@ -1,0 +1,169 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: 1.26.x
+          cache: true
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Audit frontend dependency graph
+        run: npm audit --prefix web --audit-level=low
+
+      - name: Verify Go modules
+        run: |
+          go mod verify
+          go mod tidy
+          git diff --exit-code -- go.mod go.sum
+
+      - name: Check Go formatting
+        shell: bash
+        run: test -z "$(gofmt -l .)"
+
+      - name: Lint Go
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+        with:
+          version: v2.12.2
+
+      - name: Test backend
+        run: go test -race -coverprofile=coverage.out ./...
+
+      - name: Scan reachable Go vulnerabilities
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
+
+      - name: Test frontend
+        working-directory: web
+        run: npm test
+
+      - name: Build embedded binary
+        run: |
+          npm run build --prefix web
+          CGO_ENABLED=0 go build -trimpath -o afterwords ./cmd/afterwords
+
+      - name: Smoke-test binary
+        shell: bash
+        run: |
+          PORT=18081 BASE_URL=http://127.0.0.1:18081 DB_PATH="$RUNNER_TEMP/afterwords-smoke.db" SMTP_HOST= ./afterwords >"$RUNNER_TEMP/afterwords.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:18081/healthz >/dev/null; then break; fi
+            if ! kill -0 "$server_pid" 2>/dev/null; then cat "$RUNNER_TEMP/afterwords.log"; exit 1; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:18081/healthz | grep -q 'ok'
+          curl --fail --silent http://127.0.0.1:18081/ | grep -qi 'afterwords'
+
+      - name: Validate release archives
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        with:
+          distribution: goreleaser
+          version: v2.17.1
+          args: release --snapshot --clean
+
+  e2e:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      mailpit:
+        image: axllent/mailpit:v1.30.7@sha256:d5ecbb067db3705fa953d79e1b7f81ef84038df67aba6c52825d8c02a1ea748a
+        ports:
+          - 1025:1025
+          - 8025:8025
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: 1.26.x
+          cache: true
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            web/package-lock.json
+            e2e/package-lock.json
+
+      - name: Install application dependencies
+        run: |
+          npm ci --prefix web
+          npm ci --prefix e2e
+
+      - name: Audit browser and e2e dependency graphs
+        run: |
+          npm audit --prefix web --audit-level=low
+          npm audit --prefix e2e --audit-level=low
+
+      - name: Build embedded frontend
+        run: npm run build --prefix web
+
+      - name: Install Chromium
+        run: npm run install:browsers --prefix e2e
+
+      - name: Run release-flow e2e
+        run: npm test --prefix e2e
+        env:
+          MAILPIT_URL: http://127.0.0.1:8025
+          SMTP_HOST: 127.0.0.1
+          SMTP_PORT: "1025"
+          SMTP_TLS_POLICY: none
+
+  container:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build and smoke-test the production Compose stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          export COMPOSE_PROJECT_NAME=afterwords-ci
+          cleanup() { docker compose -f docker-compose.yml down -v --remove-orphans; }
+          trap cleanup EXIT
+          docker compose -f docker-compose.yml config --quiet
+          docker compose -f docker-compose.yml up --build -d
+          container_id="$(docker compose -f docker-compose.yml ps -q afterwords)"
+          test -n "$container_id"
+          test "$(docker inspect --format '{{.Config.User}}' "$container_id")" = afterwords
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:8080/healthz >/dev/null; then break; fi
+            if [[ "$(docker inspect --format '{{.State.Running}}' "$container_id")" != true ]]; then
+              docker compose -f docker-compose.yml logs
+              exit 1
+            fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8080/healthz | grep -q 'ok'
+          curl --fail --silent http://127.0.0.1:8080/ | grep -qi 'afterwords'
