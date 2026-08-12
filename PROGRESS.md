@@ -43,9 +43,10 @@ The owner explicitly authorized uninterrupted autonomous execution across milest
 
 ## Verification
 
-- `go test -work ./...`, `go vet ./...`, `go mod verify`, and a trimmed production binary build pass with Go 1.26.5 (module minimum Go 1.25).
+- `go test -race -cover ./...` (the Makefile gate), `go vet ./...`, `go mod verify`, and a trimmed production binary build pass. Verified with Go 1.25.12 and 1.26.5; the module minimum is Go 1.25. The race detector reports no data races across 55 tests.
 - `govulncheck ./...` reports zero reachable Go vulnerabilities after upgrading `go-mail`, `x/crypto`, and `x/text`; Docker Scout reports zero critical/high findings in the final image.
-- Frontend TypeScript checks, 6 Vitest crypto/fragment tests, and the Vite 8 production build pass.
+- Frontend TypeScript checks, 9 Vitest crypto/fragment/secure-context tests, and the Vite 8 production build pass.
+- Accessibility: axe-core (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`) reports zero violations on the authentication, recipient, dashboard, and wizard screens at 1280x800 and 375x812 in both themes, including the recipient page after a share is entered. Contrast was measured from the palette tokens rather than inferred: secondary text clears 5.27:1 and accent fills clear 5.26:1 at their worst pairing.
 - Playwright 1.62 completes owner setup → encrypted vault → Recovery Kits → scaled deadline release through SMTP/Mailpit → recipient share reconstruction → plaintext display.
 - Full and production-only npm audits report zero vulnerabilities for both `web` and `e2e` lockfiles.
 - Production and development Compose files pass `docker compose config --quiet` validation. The production image builds locally, runs as the unprivileged `afterwords` user with a read-only root filesystem/capabilities dropped, and serves both `/healthz` and the embedded SPA.
