@@ -20,7 +20,7 @@
     "shamir-secret-sharing": "0.0.4"
   },
   "devDependencies": {
-    "@types/node": "24.13.3",
+    "@types/node": "26.2.0",
     "@types/qrcode": "1.5.5",
     "@types/react": "18.3.18",
     "@types/react-dom": "18.3.5",
