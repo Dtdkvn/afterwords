@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yewud/afterwords/internal/clock"
-	"github.com/yewud/afterwords/internal/model"
+	"github.com/Dtdkvn/afterwords/internal/clock"
+	"github.com/Dtdkvn/afterwords/internal/model"
 )
 
 func TestPruneExpiredUsesInjectedClock(t *testing.T) {

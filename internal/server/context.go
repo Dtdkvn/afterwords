@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/yewud/afterwords/internal/model"
+	"github.com/Dtdkvn/afterwords/internal/model"
 )
 
 type contextKey string

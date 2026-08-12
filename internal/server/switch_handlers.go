@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/yewud/afterwords/internal/mail"
-	"github.com/yewud/afterwords/internal/model"
-	"github.com/yewud/afterwords/internal/store"
+	"github.com/Dtdkvn/afterwords/internal/mail"
+	"github.com/Dtdkvn/afterwords/internal/model"
+	"github.com/Dtdkvn/afterwords/internal/store"
 )
 
 type switchInput struct {

@@ -1,0 +1,108 @@
+name: Bug report
+description: Report a reproducible problem in Afterwords
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Afterwords. Use fictional data in every example.
+
+        **Do not paste vault content, passwords, session cookies, API or magic-link tokens, release URLs, trustee shares, SMTP credentials, or unredacted logs.** If the issue may be a vulnerability, stop here and use the private security reporting link in the issue chooser.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Browser encryption or vault handling
+        - Recovery Kit or recipient decryption
+        - Check-in, deadline, or switch state
+        - SMTP, outbox, or delivery retry
+        - Authentication or owner setup
+        - Docker, reverse proxy, or deployment
+        - Web interface or accessibility
+        - Build, release archive, or SBOM
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and its impact without including sensitive data.
+      placeholder: After a fictional test message reached the final retry, the Activity view...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Give the smallest repeatable sequence using only fictional owners, recipients, vault items, tokens, and shares.
+      placeholder: |
+        1. Start a fresh instance with...
+        2. Create a switch with...
+        3. Trigger...
+        4. Observe...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Use the release tag, binary version output, or commit SHA. Do not paste a capability URL.
+      placeholder: v0.1.0 or 61b029c
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installation method
+      options:
+        - Docker Compose
+        - Release archive
+        - Built from source
+        - Development stack
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS/architecture, browser, reverse proxy, database location type, and SMTP relay type when relevant.
+      placeholder: Ubuntu 24.04 amd64; Docker Compose; Firefox 141; Caddy; transactional SMTP relay
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Redacted diagnostics
+      description: Include only the smallest useful log excerpt, browser error, or screenshot after removing addresses, content, credentials, tokens, URLs, shares, cookies, and ciphertext.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Safety checks
+      options:
+        - label: I searched existing issues and read the relevant README and SECURITY guidance.
+          required: true
+        - label: I used fictional data and removed all secrets, tokens, shares, private URLs, personal information, and vault content.
+          required: true
+        - label: This report does not describe a security vulnerability that should be handled privately.
+          required: true

@@ -7,10 +7,10 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/yewud/afterwords/internal/clock"
-	"github.com/yewud/afterwords/internal/mail"
-	"github.com/yewud/afterwords/internal/model"
-	"github.com/yewud/afterwords/internal/store"
+	"github.com/Dtdkvn/afterwords/internal/clock"
+	"github.com/Dtdkvn/afterwords/internal/mail"
+	"github.com/Dtdkvn/afterwords/internal/model"
+	"github.com/Dtdkvn/afterwords/internal/store"
 )
 
 // Engine processes deadlines and releases.

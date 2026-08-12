@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yewud/afterwords/internal/model"
+	"github.com/Dtdkvn/afterwords/internal/model"
 )
 
 const maxDeliveryAttempts = 10

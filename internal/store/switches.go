@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yewud/afterwords/internal/model"
+	"github.com/Dtdkvn/afterwords/internal/model"
 )
 
 // CreateSwitchParams contains validated switch settings.

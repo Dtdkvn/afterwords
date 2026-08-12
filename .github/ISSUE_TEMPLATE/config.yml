@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability privately
+    url: https://github.com/Dtdkvn/afterwords/security/advisories/new
+    about: Do not disclose vulnerabilities, tokens, trustee shares, release URLs, credentials, or vault content in a public issue.

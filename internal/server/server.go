@@ -13,9 +13,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/yewud/afterwords/internal/auth"
-	"github.com/yewud/afterwords/internal/clock"
-	"github.com/yewud/afterwords/internal/store"
+	"github.com/Dtdkvn/afterwords/internal/auth"
+	"github.com/Dtdkvn/afterwords/internal/clock"
+	"github.com/Dtdkvn/afterwords/internal/store"
 )
 
 const sessionCookie = "afterwords_session"

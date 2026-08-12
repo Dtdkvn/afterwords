@@ -14,12 +14,12 @@ import (
 	"syscall"
 	"time"
 
-	appclock "github.com/yewud/afterwords/internal/clock"
-	"github.com/yewud/afterwords/internal/config"
-	"github.com/yewud/afterwords/internal/engine"
-	appmail "github.com/yewud/afterwords/internal/mail"
-	"github.com/yewud/afterwords/internal/server"
-	"github.com/yewud/afterwords/internal/store"
+	appclock "github.com/Dtdkvn/afterwords/internal/clock"
+	"github.com/Dtdkvn/afterwords/internal/config"
+	"github.com/Dtdkvn/afterwords/internal/engine"
+	appmail "github.com/Dtdkvn/afterwords/internal/mail"
+	"github.com/Dtdkvn/afterwords/internal/server"
+	"github.com/Dtdkvn/afterwords/internal/store"
 )
 
 var (

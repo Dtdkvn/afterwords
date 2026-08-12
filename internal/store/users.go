@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yewud/afterwords/internal/model"
+	"github.com/Dtdkvn/afterwords/internal/model"
 )
 
 // SetupRequired reports whether the first owner still needs to be created.

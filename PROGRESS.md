@@ -17,7 +17,7 @@ The owner explicitly authorized uninterrupted autonomous execution across milest
 ## Decisions
 
 - Kept the working name **Afterwords**. A 2026-08-11 check found unrelated GitHub repositories with that word, but no exact npm package and no official Docker Hub image; nothing found occupied this product niche.
-- The canonical Go module and expected publication path are `github.com/yewud/afterwords` and `https://github.com/yewud/afterwords`. This local repository has no configured remote and has not been pushed or published.
+- The canonical Go module and expected publication path are `github.com/Dtdkvn/afterwords` and `https://github.com/Dtdkvn/afterwords`. This local repository has no configured remote and has not been pushed or published.
 - The server stores session credentials and the account login password hash, but never the vault passphrase, Data Key, trustee shares, or plaintext vault data.
 - Recovery Kit shares are created in the browser and can be printed, downloaded, copied, or encoded into a locally generated QR code. Share-bearing email actions were deliberately removed because a mail client/provider is outside the zero-knowledge boundary. The server emails instructions only and never a share.
 - Trustee share fingerprints are SHA-256 hashes of the decoded share bytes. They validate a submitted share without revealing it.

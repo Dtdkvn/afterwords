@@ -27,7 +27,7 @@ A contribution that weakens an invariant must not be merged, even if it makes a 
 Prerequisites are Go 1.25+, Node.js 24+, npm, GNU Make, Bash, standard POSIX utilities, `curl`, and Docker for Mailpit/demo tests. Windows contributors should use WSL or an equivalent environment with these tools.
 
 ```bash
-git clone https://github.com/yewud/afterwords.git
+git clone https://github.com/Dtdkvn/afterwords.git
 cd afterwords
 make setup
 make test

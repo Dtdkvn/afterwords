@@ -14,6 +14,8 @@ required=(
   README.md
   SECURITY.md
   CONTRIBUTING.md
+  docs/LAUNCH.md
+  docs/DECISIONS.md
   .env.example
   scripts/record-demo.md
 )

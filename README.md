@@ -2,11 +2,13 @@
 
 # Afterwords
 
-**A self-hosted dead man's switch that cannot read what you leave behind.**
+**A self-hosted dead man's switch with browser-only vault encryption and trustee-assisted recovery.**
 
-Check in periodically. If you stay silent past your deadline and grace period, Afterwords releases your encrypted messages to the people you chose. Trustees reconstruct the key in the recipient's browser; the server never receives plaintext or recovery shares.
+Check in periodically. If you stay silent past your deadline and grace period, Afterwords releases encrypted messages to the people you chose. Encryption, key splitting, reconstruction, and decryption happen in the browser. A correctly built and operated server stores ciphertext and operational metadata, but never receives vault plaintext, the vault passphrase, the Data Key, or trustee recovery shares.
 
-[Quick start](#quick-start) · [How it works](#how-it-works) · [Security model](SECURITY.md) · [Demo](#run-the-accelerated-demo)
+[![CI](https://github.com/Dtdkvn/afterwords/actions/workflows/ci.yml/badge.svg)](https://github.com/Dtdkvn/afterwords/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-2f6f5e.svg)](LICENSE)
+
+[Quick start](#quick-start) · [How it works](#how-it-works) · [Security model](SECURITY.md) · [Demo](#run-the-accelerated-demo) · [Production checklist](#production-checklist)
 
 </div>
 
@@ -19,15 +21,15 @@ Check in periodically. If you stay silent past your deadline and grace period, A
 - **Recipients get a humane flow.** A release link opens calm, numbered instructions instead of handing a grieving person a command-line puzzle.
 - **The whole lifecycle is testable.** Recovery Kits, fire drills, durable email delivery, an audit trail, and accelerated time make failure visible before it matters.
 
+Afterwords makes a narrow security promise, not a blanket claim. It protects vault content from database and backup disclosure and from an honest-but-curious server, but a compromised server can still serve malicious JavaScript. Read the [security model](SECURITY.md#the-web-delivered-cryptography-limitation) before relying on it.
+
 ## Quick start
 
 ```bash
-git clone https://github.com/yewud/afterwords.git
+git clone https://github.com/Dtdkvn/afterwords.git
 cd afterwords
 docker compose up --build
 ```
-
-This local checkout is prepared for the expected publication path `https://github.com/yewud/afterwords`; no public remote is created or pushed automatically.
 
 Open [http://localhost:8080](http://localhost:8080), create the single owner account, and follow the setup wizard. The SQLite database lives in the `afterwords-data` Docker volume.
 
@@ -149,7 +151,7 @@ Backups contain authentication data, contact metadata, schedules, audit history,
 
 ## Single-binary install
 
-Release archives contain a CGO-free binary for Linux amd64/arm64 and macOS arm64 plus SHA-256 checksums.
+Tagged releases are configured to produce CGO-free binaries for Linux amd64/arm64 and macOS arm64, plus SHA-256 checksums and an SBOM for each archive.
 
 ```bash
 tar -xzf afterwords_VERSION_linux_amd64.tar.gz
@@ -175,7 +177,7 @@ Useful targets:
 | `make dev` | Runs the API, Vite, and Mailpit with Compose |
 | `make lint` | Checks Go formatting/vet/golangci-lint and frontend lint rules |
 | `make test` | Runs Go race/unit/integration tests and Vitest crypto tests |
-| `make e2e` | Runs the Playwright release flow |
+| `make e2e` | Runs the Playwright release/recovery and state-control flows |
 | `make demo` | Runs the accelerated end-to-end scenario |
 | `make build` | Builds the frontend and embedded static binary |
 
@@ -190,7 +192,7 @@ internal/server/      strict HTTP API, auth middleware, embedded SPA
 internal/mail/        templates and durable SMTP sender
 migrations/           embedded sequential SQL migrations
 web/                  React/Vite UI and browser-only cryptography
-e2e/                  Playwright full-release scenario
+e2e/                  Playwright release/recovery and state-control flows
 scripts/              accelerated demo and recording guide
 ```
 
@@ -216,7 +218,7 @@ v0.1 deliberately supports one owner, one SQLite process, email delivery, local 
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a change. Security issues belong in a private GitHub Security Advisory, not a public issue.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a change. Maintainers can use the [launch kit](docs/LAUNCH.md) for repository metadata, announcement copy, and the publication checklist. Security issues belong in a [private GitHub Security Advisory](https://github.com/Dtdkvn/afterwords/security/advisories/new), not a public issue.
 
 ## License
 

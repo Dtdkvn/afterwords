@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yewud/afterwords/internal/model"
+	"github.com/Dtdkvn/afterwords/internal/model"
 )
 
 // AddAudit appends a non-secret event record.
