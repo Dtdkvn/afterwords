@@ -33,7 +33,7 @@ make setup
 make test
 ```
 
-The URL above is the expected canonical publication path. This local build has no configured remote until the repository is explicitly created and pushed.
+The canonical repository is <https://github.com/Dtdkvn/afterwords>. Use that repository for contributions, issue reports, and coordinated security disclosure.
 
 Run the development stack with `make dev`. The UI is at `http://localhost:5173`, the API at `http://localhost:8080`, and Mailpit at `http://localhost:8025`.
 

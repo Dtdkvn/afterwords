@@ -66,7 +66,7 @@ Repository: https://github.com/Dtdkvn/afterwords
 
 ### Repository and profile
 
-- [ ] Create the public repository at <https://github.com/Dtdkvn/afterwords> and push the reviewed `main` branch.
+- [ ] Push the reviewed `main` branch to <https://github.com/Dtdkvn/afterwords> and verify it is the default branch.
 - [ ] Confirm `github.com/Dtdkvn/afterwords` is the module path used by `go.mod`, Go imports, documentation, and release metadata.
 - [ ] Set the GitHub About description and suggested topics from this page.
 - [ ] Confirm GitHub recognizes the MIT license and displays the CI workflow.
@@ -99,3 +99,18 @@ Repository: https://github.com/Dtdkvn/afterwords
 - [ ] Move suspected vulnerabilities to private reporting immediately and keep real secrets out of public issues.
 - [ ] Reproduce bug reports with fictional data, document confirmed limitations, and avoid promising timelines before the scope is understood.
 - [ ] Keep the security model and operational checklist synchronized with every behavior change.
+
+## First release workflow
+
+The first release tag is `v0.1.0`. Tag only the exact commit that is already present on `origin/main`; the release workflow rejects tags that are not ancestors of the remote default branch.
+
+From a clean, verified `main` checkout after its CI run succeeds:
+
+```bash
+git tag --annotate v0.1.0 --message "Afterwords v0.1.0"
+git push origin refs/tags/v0.1.0
+```
+
+Pushing the tag starts `.github/workflows/release.yml`. The workflow validates the tag and `main` ancestry, installs and audits locked dependencies without release credentials, runs Go and frontend tests, builds the embedded frontend, runs the Playwright release flow against Mailpit, and builds and inspects a GoReleaser snapshot. Only the final GoReleaser invocation receives `GITHUB_TOKEN`, and it skips dependency hooks. GoReleaser then creates a **draft** GitHub Release containing Linux amd64/arm64 and macOS arm64 archives, SHA-256 checksums, and one SBOM per archive.
+
+Review the draft assets and release notes before publishing it. v0.1.0 artifacts are checksummed but not signed, and the project does not claim verified bit-for-bit reproducible builds.
