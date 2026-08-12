@@ -86,6 +86,18 @@ Pull requests should explain:
 
 Migrations are embedded, sequential, immutable after release, and applied transactionally. Add a new numbered migration instead of editing one that has shipped. Include upgrade and fresh-database tests.
 
+## Release snapshots
+
+Use GoReleaser v2.17.1 with Go, Node.js, and npm available on `PATH`:
+
+```bash
+goreleaser check
+goreleaser release --snapshot --clean
+bash scripts/check-release-archives.sh dist
+```
+
+The GoReleaser configuration installs the locked frontend dependencies, rebuilds the embedded application, and refuses to package it if `internal/server/webdist` differs from the committed output. This makes a manual release enforce the same fresh-frontend invariant as CI.
+
 ## Dependencies
 
 Avoid adding dependencies for short functions. For a necessary dependency, document why it is needed, its maintenance state, license, browser/server footprint, and any relevant security audit. Commit lockfile changes and inspect install scripts before merging.

@@ -2,6 +2,12 @@ version: 2
 
 project_name: afterwords
 
+before:
+  hooks:
+    - npm ci --prefix web
+    - npm run build --prefix web
+    - git diff --exit-code -- internal/server/webdist
+
 builds:
   - id: afterwords
     main: ./cmd/afterwords
