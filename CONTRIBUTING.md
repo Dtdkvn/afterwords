@@ -98,6 +98,8 @@ bash scripts/check-release-archives.sh dist
 
 The GoReleaser configuration installs the locked frontend dependencies, rebuilds the embedded application, and refuses to package it if `internal/server/webdist` differs from the committed output. This makes a manual release enforce the same fresh-frontend invariant as CI.
 
+The tag workflow runs those hooks and validates a complete snapshot before release credentials are available. Its final publish invocation uses `--skip=before` so npm lifecycle scripts never run in a process that holds `GITHUB_TOKEN`; it publishes the already-validated checkout instead.
+
 ## Dependencies
 
 Avoid adding dependencies for short functions. For a necessary dependency, document why it is needed, its maintenance state, license, browser/server footprint, and any relevant security audit. Commit lockfile changes and inspect install scripts before merging.
