@@ -2,6 +2,7 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react'
 import { Download, File, FilePlus2, History, LockKeyhole, Mail, MessageSquarePlus, ShieldCheck, Trash2, Users, X } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { APIError, api } from '../lib/api'
+import { latestDeliveryEntryIDs } from '../lib/audit'
 import { base64ToBytes, bytesToBase64, decryptVaultItem, encryptVaultContent, unwrapDataKey } from '../lib/crypto'
 import type { AuditEntry, Keyslot, Recipient, SwitchRecord, Trustee, VaultContent, VaultItem } from '../types'
 import { Spinner } from './Brand'
@@ -149,15 +150,11 @@ function PeoplePanel({ recipients, trustees, threshold, total }: { recipients: R
 }
 
 function AuditPanel({ entries, busy, onRetry }: { entries: AuditEntry[]; busy: boolean; onRetry: (messageId: string) => void }) {
-  const latestDeliveryState = new Map<string, string>()
-  for (const entry of entries) {
-    const messageId = typeof entry.meta.messageId === 'string' ? entry.meta.messageId : ''
-    if (messageId && !latestDeliveryState.has(messageId) && ['email.dead_lettered', 'email.requeued', 'email.sent'].includes(entry.event)) latestDeliveryState.set(messageId, entry.event)
-  }
+  const latestDeliveryEntries = latestDeliveryEntryIDs(entries)
   return <div className="audit-panel"><header><History /><div><h3>Private activity log</h3><p>Operational events only. No message text, passphrase, key, or share is logged.</p></div></header><ol>{entries.map((entry) => {
     const messageId = typeof entry.meta.messageId === 'string' ? entry.meta.messageId : ''
     const deadLettered = entry.event === 'email.dead_lettered'
-    const retryable = deadLettered && messageId && latestDeliveryState.get(messageId) === 'email.dead_lettered'
+    const retryable = deadLettered && messageId && latestDeliveryEntries.get(messageId) === entry.id
     return <li key={entry.id}><span /><div><strong>{deadLettered ? 'Email delivery stopped after 10 attempts' : humanEvent(entry.event)}</strong><small>{new Date(entry.createdAt).toLocaleString()}{retryable ? ' · Check SMTP settings, then retry.' : ''}</small>{retryable ? <button className="secondary-button" disabled={busy} onClick={() => onRetry(messageId)}><Mail size={15} />Retry delivery</button> : null}</div></li>
   })}</ol></div>
 }
