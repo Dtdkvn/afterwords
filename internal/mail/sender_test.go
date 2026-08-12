@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	mailclient "github.com/wneessen/go-mail"
 	"github.com/Dtdkvn/afterwords/internal/clock"
 	"github.com/Dtdkvn/afterwords/internal/model"
 	"github.com/Dtdkvn/afterwords/internal/store"
+	mailclient "github.com/wneessen/go-mail"
 )
 
 func TestParseTLSPolicy(t *testing.T) {

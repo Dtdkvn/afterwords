@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/Dtdkvn/afterwords/internal/auth"
 	"github.com/Dtdkvn/afterwords/internal/clock"
 	"github.com/Dtdkvn/afterwords/internal/store"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 const sessionCookie = "afterwords_session"

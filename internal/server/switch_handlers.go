@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/Dtdkvn/afterwords/internal/mail"
 	"github.com/Dtdkvn/afterwords/internal/model"
 	"github.com/Dtdkvn/afterwords/internal/store"
+	"github.com/go-chi/chi/v5"
 )
 
 type switchInput struct {

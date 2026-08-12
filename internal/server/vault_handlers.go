@@ -6,9 +6,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/Dtdkvn/afterwords/internal/mail"
 	"github.com/Dtdkvn/afterwords/internal/model"
+	"github.com/go-chi/chi/v5"
 )
 
 var fingerprintPattern = regexp.MustCompile(`^[a-f0-9]{64}$`)
