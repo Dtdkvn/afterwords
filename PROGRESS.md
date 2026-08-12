@@ -2,6 +2,13 @@
 
 Last updated: 2026-08-12
 
+## Public release
+
+- Public repository: <https://github.com/Dtdkvn/afterwords>
+- Current release: [`v0.1.0`](https://github.com/Dtdkvn/afterwords/releases/tag/v0.1.0), published 2026-08-12
+- Release assets: macOS arm64 and Linux amd64/arm64 archives, SHA-256 checksums, and one SPDX 2.3 SBOM per archive
+- Hosted release verification: Go race tests and lint, frontend tests/build, the real Mailpit recovery flow, archive-contract checks, and GoReleaser all passed on the tagged commit
+
 ## Milestones
 
 | Milestone | Status | Notes |
