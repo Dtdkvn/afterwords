@@ -75,7 +75,8 @@ test('owner to Recovery Kits to recipient plaintext @demo', async ({ page, conte
   await recipientPage.goto(releaseURL.startsWith('http') ? releaseURL : new URL(releaseURL, baseURL).toString())
   await expect(recipientPage.getByText('Someone who cared about you')).toBeVisible()
 
-  await recipientPage.getByTestId('release-shares').fill('aw1.not-a-share-from-this-release')
+  const sameFormatWrongShare = shares[0].slice(0, -1) + (shares[0].endsWith('A') ? 'B' : 'A')
+  await recipientPage.getByTestId('release-shares').fill(sameFormatWrongShare)
   await recipientPage.getByTestId('open-release').click()
   await expect(recipientPage.getByRole('alert')).toContainText('does not belong to this release')
 
