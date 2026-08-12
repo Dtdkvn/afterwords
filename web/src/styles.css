@@ -10,6 +10,8 @@
   --surface-solid: #fffdf9;
   --ink: #20302b;
   --muted: #69736f;
+  /* Meets WCAG AA (4.5:1) for small secondary text sitting on --paper-deep. */
+  --muted-strong: #565f5b;
   --line: rgba(32, 48, 43, 0.13);
   --moss: #2f766d;
   --moss-deep: #245f58;
@@ -28,6 +30,7 @@
   --surface-solid: #1b2723;
   --ink: #edf3ef;
   --muted: #a5b0ac;
+  --muted-strong: #b9c3bf;
   --line: rgba(237, 243, 239, 0.13);
   --moss: #72b8ab;
   --moss-deep: #8ac9bd;
@@ -369,7 +372,7 @@ textarea { resize: vertical; line-height: 1.6; }
 .release-steps li small { margin-top: 3px; color: var(--muted); font-size: 10px; }
 .trustee-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
 .trustee-chips span { display: grid; padding: 7px 10px; border-radius: 9px; background: var(--paper-deep); font-size: 11px; font-weight: 700; }
-.trustee-chips small { color: var(--muted); font-size: 8px; font-weight: 600; }
+.trustee-chips small { color: var(--muted-strong); font-size: 9px; font-weight: 600; }
 .share-input { display: grid; gap: 8px; }
 .share-input textarea { font: 10px/1.5 ui-monospace, monospace; }
 .share-file-button { position: relative; display: flex; align-items: center; gap: 7px; margin-top: 9px; padding: 9px 11px; border: 1px dashed var(--line); border-radius: 10px; color: var(--moss); font-size: 11px; font-weight: 700; cursor: pointer; }
