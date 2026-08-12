@@ -15,12 +15,19 @@ test('owner to Recovery Kits to recipient plaintext @demo', async ({ page, conte
   await page.getByTestId('switch-name').fill(uniqueName)
   await page.getByTestId('interval-days').fill('1')
   await page.getByTestId('grace-days').fill('0')
+  const createdSwitch = page.waitForResponse((response) => response.url().endsWith('/api/switches') && response.request().method() === 'POST')
   await page.getByTestId('wizard-next').click()
+  const createdPayload = await (await createdSwitch).json() as { switch: { id: string } }
 
   await page.getByTestId('vault-title').fill('For a rainy afternoon')
   await page.getByTestId('vault-message').fill('## You found it\n\nThe important thing is simple: **you were loved, every day.**')
   await page.getByTestId('vault-passphrase').fill(vaultPassphrase)
   await page.getByLabel('Repeat passphrase').fill(vaultPassphrase)
+
+  // TIME_SCALE can make a one-day switch overdue while Argon2 is deriving the
+  // browser key. A dashboard action races with the wizard only in accelerated
+  // demo mode, so keep this flow active until setup has committed atomically.
+  await browserAPI(page, `/api/switches/${createdPayload.switch.id}/checkin`, { method: 'POST', json: {} })
   await page.getByTestId('encrypt-vault').click()
 
   await page.getByLabel('Name').nth(0).fill('Morgan Recipient')
