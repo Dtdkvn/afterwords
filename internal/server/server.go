@@ -88,6 +88,7 @@ func (s *Server) Handler() http.Handler {
 		protected.Post("/api/switches/{switchID}/trustees/{personID}/delivered", s.markKitDelivered)
 		protected.Delete("/api/switches/{switchID}/trustees/{personID}", s.deleteTrustee)
 		protected.Get("/api/switches/{switchID}/audit", s.listAudit)
+		protected.Post("/api/switches/{switchID}/outbox/{messageID}/retry", s.retryDeadLetter)
 	})
 	r.Handle("/*", s.spaHandler())
 	return r

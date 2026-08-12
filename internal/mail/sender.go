@@ -70,8 +70,11 @@ func (s *Sender) deliverBatch(ctx context.Context) {
 	for _, message := range messages {
 		if err := s.deliver(ctx, message.ToEmail, message.Subject, message.BodyHTML, message.BodyText); err != nil {
 			s.logger.Warn("email delivery failed", "message_id", message.ID, "kind", message.Kind)
-			if markErr := s.store.MarkMessageFailed(ctx, message.ID, message.Attempts, err); markErr != nil {
+			deadLettered, markErr := s.store.MarkMessageFailed(ctx, message.ID, err)
+			if markErr != nil {
 				s.logger.Error("record email failure", "message_id", message.ID, "error", markErr)
+			} else if deadLettered {
+				s.logger.Error("email moved to dead letter after retry budget exhausted", "message_id", message.ID, "kind", message.Kind, "attempts", message.Attempts+1)
 			}
 			continue
 		}

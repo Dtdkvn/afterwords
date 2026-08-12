@@ -99,5 +99,6 @@ export const api = {
   markKitDelivered: (id: string, personId: string) => request<void>(`/api/switches/${id}/trustees/${personId}/delivered`, { method: 'POST', json: {} }),
   deleteTrustee: (id: string, personId: string) => request<void>(`/api/switches/${id}/trustees/${personId}`, { method: 'DELETE' }),
   listAudit: (id: string) => request<{ entries: AuditEntry[] }>(`/api/switches/${id}/audit`),
+  retryDeadLetter: (switchId: string, messageId: string) => request<{ queued: boolean }>(`/api/switches/${switchId}/outbox/${messageId}/retry`, { method: 'POST', json: {} }),
   releaseBundle: (token: string) => request<ReleaseBundle>(`/api/release/${encodeURIComponent(token)}/bundle`),
 }

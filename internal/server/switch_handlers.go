@@ -239,3 +239,12 @@ func (s *Server) listAudit(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"entries": entries})
 }
+
+func (s *Server) retryDeadLetter(w http.ResponseWriter, r *http.Request) {
+	err := s.store.RetryDeadLetter(r.Context(), userFrom(r).ID, chi.URLParam(r, "switchID"), chi.URLParam(r, "messageID"))
+	if err != nil {
+		writeStoreError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusAccepted, map[string]any{"queued": true})
+}

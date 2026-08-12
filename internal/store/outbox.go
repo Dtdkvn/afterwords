@@ -11,6 +11,8 @@ import (
 	"github.com/yewud/afterwords/internal/model"
 )
 
+const maxDeliveryAttempts = 10
+
 // EnqueueMessage appends mail to the durable outbox.
 func (s *Store) EnqueueMessage(ctx context.Context, message model.OutboxMessage) (string, error) {
 	id, err := newID()
@@ -107,7 +109,7 @@ func (s *Store) PendingMessages(ctx context.Context, limit int) ([]model.OutboxM
 	}
 	rows, err := s.db.QueryContext(ctx, `SELECT id,COALESCE(switch_id,''),kind,to_email,subject,body_html,body_text,
       scheduled_at,sent_at,attempts,COALESCE(last_error,'') FROM outbox
-      WHERE sent_at IS NULL AND attempts < 10 AND scheduled_at <= ? ORDER BY scheduled_at LIMIT ?`, formatTime(s.clock.Now()), limit)
+      WHERE sent_at IS NULL AND attempts < ? AND scheduled_at <= ? ORDER BY scheduled_at LIMIT ?`, maxDeliveryAttempts, formatTime(s.clock.Now()), limit)
 	if err != nil {
 		return nil, err
 	}
@@ -160,19 +162,103 @@ func (s *Store) MarkMessageSent(ctx context.Context, id string) error {
 	return tx.Commit()
 }
 
-func (s *Store) MarkMessageFailed(ctx context.Context, id string, attempts int, deliveryErr error) error {
-	delay := time.Minute * time.Duration(1<<min(attempts, 6))
+// MarkMessageFailed schedules another attempt or moves the message to the
+// terminal dead-letter state. The returned boolean is true only for the
+// transition that exhausts the retry budget.
+func (s *Store) MarkMessageFailed(ctx context.Context, id string, deliveryErr error) (bool, error) {
 	safeError := "delivery failed"
 	if deliveryErr != nil {
 		safeError = deliveryErr.Error()
 		if len(safeError) > 500 {
 			safeError = safeError[:500]
 		}
+		safeError = strings.ReplaceAll(safeError, "\r", " ")
 		safeError = strings.ReplaceAll(safeError, "\n", " ")
 	}
-	_, err := s.db.ExecContext(ctx, `UPDATE outbox SET attempts=attempts+1,last_error=?,scheduled_at=?
-      WHERE id=? AND sent_at IS NULL`, safeError, formatTime(s.clock.Now().Add(delay)), id)
-	return err
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return false, err
+	}
+	defer func() { _ = tx.Rollback() }()
+	var switchID, kind string
+	var attempts int
+	err = tx.QueryRowContext(ctx, `SELECT COALESCE(switch_id,''),kind,attempts FROM outbox
+      WHERE id=? AND sent_at IS NULL AND attempts < ?`, id, maxDeliveryAttempts).Scan(&switchID, &kind, &attempts)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	nextAttempts := attempts + 1
+	delay := time.Minute * time.Duration(1<<min(attempts, 6))
+	result, err := tx.ExecContext(ctx, `UPDATE outbox SET attempts=?,last_error=?,scheduled_at=?
+      WHERE id=? AND sent_at IS NULL AND attempts=?`, nextAttempts, safeError, formatTime(s.clock.Now().Add(delay)), id, attempts)
+	if err != nil {
+		return false, err
+	}
+	updated, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	if updated == 0 {
+		return false, nil
+	}
+	deadLettered := nextAttempts >= maxDeliveryAttempts
+	if deadLettered && switchID != "" {
+		if err := insertAudit(ctx, tx, switchID, "email.dead_lettered", map[string]any{
+			"attempts":  nextAttempts,
+			"kind":      kind,
+			"messageId": id,
+		}, s.clock.Now()); err != nil {
+			return false, err
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return false, err
+	}
+	return deadLettered, nil
+}
+
+// RetryDeadLetter resets a terminal outbox message after an authenticated
+// owner has corrected the underlying SMTP problem.
+func (s *Store) RetryDeadLetter(ctx context.Context, userID, switchID, messageID string) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+	var kind string
+	var attempts int
+	var sentAt sql.NullString
+	err = tx.QueryRowContext(ctx, `SELECT outbox.kind,outbox.attempts,outbox.sent_at
+      FROM outbox JOIN switches ON switches.id=outbox.switch_id
+      WHERE outbox.id=? AND outbox.switch_id=? AND switches.user_id=?`, messageID, switchID, userID).Scan(&kind, &attempts, &sentAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return ErrNotFound
+	}
+	if err != nil {
+		return err
+	}
+	if sentAt.Valid || attempts < maxDeliveryAttempts {
+		return ErrInvalidState
+	}
+	result, err := tx.ExecContext(ctx, `UPDATE outbox SET attempts=0,last_error=NULL,scheduled_at=?
+      WHERE id=? AND switch_id=? AND sent_at IS NULL AND attempts>=?`, formatTime(s.clock.Now()), messageID, switchID, maxDeliveryAttempts)
+	if err != nil {
+		return err
+	}
+	updated, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if updated != 1 {
+		return ErrInvalidState
+	}
+	if err := insertAudit(ctx, tx, switchID, "email.requeued", map[string]any{"kind": kind, "messageId": messageID}, s.clock.Now()); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 // OutboxCount is used by state-engine acceptance tests and diagnostics.

@@ -10,6 +10,8 @@ The account login password is an authentication credential and is hashed server-
 
 Scheduler actions first claim a stable event key in SQLite. A unique constraint makes each reminder, recipient release, and trustee instruction idempotent. Email is committed to the durable outbox and delivered by a separate retrying worker. A state change and its audit record share one transaction.
 
+Delivery uses a bounded retry budget. The tenth failure atomically moves a message to a terminal state and appends `email.dead_lettered` without copying the SMTP error or recipient into the audit metadata. The worker emits a structured error containing only the opaque message ID, kind, and attempt count. An authenticated owner can requeue that exact message from the switch Activity tab after fixing SMTP; ownership and terminal state are checked in the same transaction, and `email.requeued` records the action. `/healthz` remains a liveness check so a relay outage does not create a container restart loop.
+
 ## Time
 
 Business logic receives a `Clock`. The scaled implementation maps real elapsed time to virtual elapsed time while preserving UTC. Scheduler and sender waits are real durations; all decisions and persisted timestamps come from the injected clock.

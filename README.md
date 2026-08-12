@@ -143,7 +143,7 @@ Copy `.env.example` to `.env`, set a public HTTPS URL and SMTP credentials, then
 - Persist and back up the `/data` volume. Test restore procedures on a separate instance.
 - Store `.env` outside source control and restrict database/backups to the service account.
 - Run a complete fire drill after setup and after every infrastructure change.
-- Monitor `/healthz`, disk space, and undelivered outbox attempts.
+- Monitor `/healthz`, disk space, and `email.dead_lettered` error logs. After 10 failed attempts, the message is retained and a non-secret terminal event appears in the switch's **Activity** tab. Correct the SMTP problem there, then choose **Retry delivery**; the retry and eventual delivery are both audited.
 
 Backups contain authentication data, contact metadata, schedules, audit history, and ciphertext. They do not contain plaintext, the vault passphrase, the Data Key, or trustee shares, but they are still sensitive.
 

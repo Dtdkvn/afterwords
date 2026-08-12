@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/yewud/afterwords/internal/clock"
+	"github.com/yewud/afterwords/internal/model"
 	"github.com/yewud/afterwords/internal/store"
 )
 
@@ -103,6 +104,31 @@ func TestCiphertextOnlyVaultAPIAndCheckin(t *testing.T) {
 	apiCheckin := requestJSON(t, testServer.Client(), http.MethodPost, testServer.URL+"/api/checkin/"+created.APIToken, `{}`, "", nil)
 	if apiCheckin.Code != http.StatusOK {
 		t.Fatalf("api check-in status=%d body=%s", apiCheckin.Code, apiCheckin.Body)
+	}
+
+	messageID, err := database.EnqueueMessage(ctx, model.OutboxMessage{SwitchID: created.Switch.ID, Kind: "magic_checkin", ToEmail: "owner@example.com", Subject: "Reminder", BodyHTML: "<p>Reminder</p>", BodyText: "Reminder"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := database.DB().ExecContext(ctx, "UPDATE outbox SET attempts=10,last_error='SMTP unavailable' WHERE id=?", messageID); err != nil {
+		t.Fatal(err)
+	}
+	retryURL := testServer.URL + "/api/switches/" + created.Switch.ID + "/outbox/" + messageID + "/retry"
+	withoutCSRF = requestJSON(t, testServer.Client(), http.MethodPost, retryURL, `{}`, "", setup.Cookie)
+	if withoutCSRF.Code != http.StatusForbidden {
+		t.Fatalf("dead-letter retry without CSRF status=%d, want 403", withoutCSRF.Code)
+	}
+	retry := requestJSON(t, testServer.Client(), http.MethodPost, retryURL, `{}`, setupBody.CSRFToken, setup.Cookie)
+	if retry.Code != http.StatusAccepted {
+		t.Fatalf("dead-letter retry status=%d body=%s", retry.Code, retry.Body)
+	}
+	var retriedAttempts int
+	var retriedError *string
+	if err := database.DB().QueryRowContext(ctx, "SELECT attempts,last_error FROM outbox WHERE id=?", messageID).Scan(&retriedAttempts, &retriedError); err != nil {
+		t.Fatal(err)
+	}
+	if retriedAttempts != 0 || retriedError != nil {
+		t.Fatalf("retry did not reset terminal state: attempts=%d error=%v", retriedAttempts, retriedError)
 	}
 }
 

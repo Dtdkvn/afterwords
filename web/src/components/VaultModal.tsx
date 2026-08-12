@@ -94,6 +94,20 @@ export function VaultModal({ switchValue, onClose }: { switchValue: SwitchRecord
     finally { setBusy(false) }
   }
 
+  async function retryDeadLetter(messageId: string) {
+    setBusy(true)
+    setError('')
+    try {
+      await api.retryDeadLetter(switchValue.id, messageId)
+      const result = await api.listAudit(switchValue.id)
+      setAudit(result.entries)
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : 'Could not retry this email.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const unlocked = keyRef.current !== null
   return (
     <div className="modal-backdrop">
@@ -112,7 +126,7 @@ export function VaultModal({ switchValue, onClose }: { switchValue: SwitchRecord
                 <div className="owner-items">{opened.map(({ item, content }) => <OwnerItem key={item.id} content={content} onDelete={() => void remove(item.id)} />)}</div>
               </div>
             )
-          ) : tab === 'people' ? <PeoplePanel recipients={recipients} trustees={trustees} threshold={switchValue.recoveryThreshold} total={switchValue.recoveryShareCount} /> : <AuditPanel entries={audit} />}
+          ) : tab === 'people' ? <PeoplePanel recipients={recipients} trustees={trustees} threshold={switchValue.recoveryThreshold} total={switchValue.recoveryShareCount} /> : <AuditPanel entries={audit} busy={busy} onRetry={(messageId) => void retryDeadLetter(messageId)} />}
         </div>
       </section>
     </div>
@@ -134,8 +148,18 @@ function PeoplePanel({ recipients, trustees, threshold, total }: { recipients: R
   return <div className="people-panel"><section><header><Mail /><div><h3>Recipients</h3><p>Receive the calm, guided release link.</p></div></header>{recipients.map((person) => <div className="saved-person" key={person.id}><span>{person.name.slice(0, 1).toUpperCase()}</span><div><strong>{person.name}</strong><small>{person.email}</small></div></div>)}</section><section><header><Users /><div><h3>Trustees · {threshold} of {total}</h3><p>Each holds one share that the server never sees.</p></div></header>{trustees.map((person) => <div className="saved-person" key={person.id}><span>{person.shareIndex}</span><div><strong>{person.name}</strong><small>{person.email} · kit {person.kitDeliveredAt ? 'opened' : 'not marked delivered'}</small></div></div>)}</section><div className="quiet-info full-span"><ShieldCheck /><p>Recovery shares cannot be displayed here. That absence is the zero-knowledge promise working as designed.</p></div></div>
 }
 
-function AuditPanel({ entries }: { entries: AuditEntry[] }) {
-  return <div className="audit-panel"><header><History /><div><h3>Private activity log</h3><p>Operational events only. No message text, passphrase, key, or share is logged.</p></div></header><ol>{entries.map((entry) => <li key={entry.id}><span /><div><strong>{humanEvent(entry.event)}</strong><small>{new Date(entry.createdAt).toLocaleString()}</small></div></li>)}</ol></div>
+function AuditPanel({ entries, busy, onRetry }: { entries: AuditEntry[]; busy: boolean; onRetry: (messageId: string) => void }) {
+  const latestDeliveryState = new Map<string, string>()
+  for (const entry of entries) {
+    const messageId = typeof entry.meta.messageId === 'string' ? entry.meta.messageId : ''
+    if (messageId && !latestDeliveryState.has(messageId) && ['email.dead_lettered', 'email.requeued', 'email.sent'].includes(entry.event)) latestDeliveryState.set(messageId, entry.event)
+  }
+  return <div className="audit-panel"><header><History /><div><h3>Private activity log</h3><p>Operational events only. No message text, passphrase, key, or share is logged.</p></div></header><ol>{entries.map((entry) => {
+    const messageId = typeof entry.meta.messageId === 'string' ? entry.meta.messageId : ''
+    const deadLettered = entry.event === 'email.dead_lettered'
+    const retryable = deadLettered && messageId && latestDeliveryState.get(messageId) === 'email.dead_lettered'
+    return <li key={entry.id}><span /><div><strong>{deadLettered ? 'Email delivery stopped after 10 attempts' : humanEvent(entry.event)}</strong><small>{new Date(entry.createdAt).toLocaleString()}{retryable ? ' · Check SMTP settings, then retry.' : ''}</small>{retryable ? <button className="secondary-button" disabled={busy} onClick={() => onRetry(messageId)}><Mail size={15} />Retry delivery</button> : null}</div></li>
+  })}</ol></div>
 }
 
 function humanEvent(event: string) { return event.replaceAll('.', ' ').replaceAll('_', ' ').replace(/^./u, (letter) => letter.toUpperCase()) }
