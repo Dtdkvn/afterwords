@@ -70,7 +70,11 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	defer database.Close()
+	defer func() {
+		if err := database.Close(); err != nil {
+			logger.Error("close database", "error", err)
+		}
+	}()
 
 	stateEngine := engine.New(database, virtualClock, cfg.BaseURL, logger)
 	mailSender, err := appmail.NewSender(database, cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUser, cfg.SMTPPass, cfg.SMTPFrom, cfg.SMTPTLSPolicy, logger)

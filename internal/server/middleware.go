@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Dtdkvn/afterwords/internal/clock"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func (s *Server) securityHeaders(next http.Handler) http.Handler {
@@ -99,9 +100,12 @@ func newRateLimiter(c clock.Clock, limit int, window time.Duration) *rateLimiter
 
 func (l *rateLimiter) middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		host, _, err := net.SplitHostPort(r.RemoteAddr)
-		if err != nil {
-			host = r.RemoteAddr
+		host := middleware.GetClientIP(r.Context())
+		if host == "" {
+			host, _, _ = net.SplitHostPort(r.RemoteAddr)
+			if host == "" {
+				host = r.RemoteAddr
+			}
 		}
 		key := fmt.Sprintf("%s:%s", host, r.URL.Path)
 		now := l.clock.Now()

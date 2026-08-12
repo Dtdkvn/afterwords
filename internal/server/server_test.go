@@ -155,12 +155,50 @@ func TestUntrustedForwardingHeadersCannotBypassAuthRateLimit(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		_ = response.Body.Close()
+		if err := response.Body.Close(); err != nil {
+			t.Fatal(err)
+		}
 		if attempt <= 10 && response.StatusCode == http.StatusTooManyRequests {
 			t.Fatalf("rate limited too early on attempt %d", attempt)
 		}
 		if attempt == 11 && response.StatusCode != http.StatusTooManyRequests {
 			t.Fatalf("spoofed forwarding headers bypassed rate limit: status=%d", response.StatusCode)
+		}
+	}
+}
+
+func TestTrustedProxyIgnoresSpoofedForwardingPrefixForAuthRateLimit(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	fake := clock.NewManual(time.Date(2026, 8, 11, 10, 0, 0, 0, time.UTC))
+	database, err := store.Open(ctx, "file:trusted-proxy-rate-limit-test?mode=memory&cache=shared", fake)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = database.Close() })
+	testServer := httptest.NewServer(New(database, fake, "http://example.test", false, true, "", slog.New(slog.NewTextHandler(io.Discard, nil))).Handler())
+	t.Cleanup(testServer.Close)
+	client := testServer.Client()
+	for attempt := 1; attempt <= 11; attempt++ {
+		request, err := http.NewRequest(http.MethodPost, testServer.URL+"/api/login", bytes.NewBufferString(`{}`))
+		if err != nil {
+			t.Fatal(err)
+		}
+		request.Header.Set("Content-Type", "application/json")
+		request.Header.Set("X-Forwarded-For", fmt.Sprintf("203.0.113.%d, 198.51.100.20", attempt))
+		request.Header.Set("X-Real-IP", fmt.Sprintf("192.0.2.%d", attempt))
+		response, err := client.Do(request)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := response.Body.Close(); err != nil {
+			t.Fatal(err)
+		}
+		if attempt <= 10 && response.StatusCode == http.StatusTooManyRequests {
+			t.Fatalf("rate limited too early on attempt %d", attempt)
+		}
+		if attempt == 11 && response.StatusCode != http.StatusTooManyRequests {
+			t.Fatalf("spoofed forwarding prefix bypassed rate limit: status=%d", response.StatusCode)
 		}
 	}
 }
@@ -331,7 +369,11 @@ func requestJSON(t *testing.T, client *http.Client, method, target, body, csrf s
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer response.Body.Close()
+	defer func() {
+		if err := response.Body.Close(); err != nil {
+			t.Errorf("close response body: %v", err)
+		}
+	}()
 	responseBody, err := io.ReadAll(response.Body)
 	if err != nil {
 		t.Fatal(err)

@@ -74,7 +74,7 @@ An attacker who controls a running server can also alter the served browser clie
 - Magic links are short-lived and single-use. API check-in tokens are long-lived and should be rotated after any suspected exposure.
 - Afterwords application logs intentionally exclude request bodies, tokens, cookies, email bodies, ciphertext, passphrases, shares, and plaintext. Capability tokens are present in request paths, so reverse-proxy access logs must redact or disable URI logging for `/c/`, `/r/`, `/api/checkin/`, and `/api/release/` routes.
 
-`TRUST_PROXY` must be enabled only when every request passes through a proxy you operate; accepting untrusted forwarding headers weakens client-address-based protections.
+`TRUST_PROXY` must be enabled only when every request passes through exactly one reverse proxy you operate. That proxy must append the direct client address to `X-Forwarded-For` (or replace the header before doing so). Afterwords trusts only the rightmost address and ignores attacker-controlled values to its left. A deployment with multiple proxy hops needs explicit trusted-proxy configuration that Afterwords does not currently expose; leave `TRUST_PROXY` disabled for that topology.
 
 ## Email and release risks
 

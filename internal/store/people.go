@@ -68,7 +68,7 @@ func (s *Store) listRecipients(ctx context.Context, switchID string) ([]model.Re
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	result := make([]model.Recipient, 0)
 	for rows.Next() {
 		var value model.Recipient
@@ -194,7 +194,7 @@ func (s *Store) listTrustees(ctx context.Context, switchID string) ([]model.Trus
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	result := make([]model.Trustee, 0)
 	for rows.Next() {
 		var value model.Trustee

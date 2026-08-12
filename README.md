@@ -133,7 +133,7 @@ Copy `.env.example` to `.env`, set a public HTTPS URL and SMTP credentials, then
 | `SMTP_TLS_POLICY` | `mandatory` | `mandatory`, `opportunistic` (may fall back to plaintext), or `none`; weaker modes are only for controlled legacy/local relays, with `none` reserved for an unauthenticated sink such as Mailpit |
 | `TIME_SCALE` | `1` | Virtual-time multiplier; production must stay at `1` |
 | `SECURE_COOKIES` | `false` | Set `true` behind HTTPS |
-| `TRUST_PROXY` | `false` | Enable only behind a proxy you control |
+| `TRUST_PROXY` | `false` | Enable only behind exactly one reverse proxy you control; it must append the direct client address to `X-Forwarded-For` |
 | `LOG_LEVEL` | `info` | Structured logging verbosity: `debug`, `info`, `warn`, or `error` |
 
 ### Production checklist

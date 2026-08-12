@@ -113,7 +113,7 @@ func (s *Store) PendingMessages(ctx context.Context, limit int) ([]model.OutboxM
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	result := make([]model.OutboxMessage, 0)
 	for rows.Next() {
 		var value model.OutboxMessage

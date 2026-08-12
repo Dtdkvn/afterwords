@@ -29,7 +29,7 @@ func TestReleaseCredentialsAreIsolatedFromDependencyHooks(t *testing.T) {
 	snapshot := strings.Index(workflow, "args: release --snapshot --clean")
 	publish := strings.Index(workflow, "args: release --clean --skip=before")
 	token := strings.Index(workflow, "GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}")
-	if snapshot < 0 || publish < 0 || token < 0 || !(snapshot < publish && publish < token) {
+	if snapshot < 0 || publish < 0 || token < 0 || snapshot >= publish || publish >= token {
 		t.Fatalf("release workflow must validate hooks without credentials before publishing with --skip=before: snapshot=%d publish=%d token=%d", snapshot, publish, token)
 	}
 	if strings.Count(workflow, "GITHUB_TOKEN:") != 1 {

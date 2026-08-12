@@ -104,7 +104,7 @@ func (s *Store) listVaultItems(ctx context.Context, switchID string) ([]model.Va
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	result := make([]model.VaultItem, 0)
 	for rows.Next() {
 		var item model.VaultItem

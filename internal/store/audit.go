@@ -51,7 +51,7 @@ func (s *Store) ListAudit(ctx context.Context, userID, switchID string, limit in
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	result := make([]model.AuditEntry, 0)
 	for rows.Next() {
 		var value model.AuditEntry

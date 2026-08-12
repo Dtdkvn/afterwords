@@ -78,7 +78,7 @@ func (s *Store) ListSwitches(ctx context.Context, userID string) ([]model.Switch
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	result := make([]model.Switch, 0)
 	for rows.Next() {
 		value, err := scanSwitch(rows)
@@ -96,7 +96,7 @@ func (s *Store) SchedulableSwitches(ctx context.Context) ([]model.Switch, error)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var result []model.Switch
 	for rows.Next() {
 		value, err := scanSwitch(rows)

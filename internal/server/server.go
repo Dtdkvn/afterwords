@@ -44,7 +44,9 @@ func New(s *store.Store, c clock.Clock, baseURL string, secureCookies, trustProx
 func (s *Server) Handler() http.Handler {
 	r := chi.NewRouter()
 	if s.trustProxy {
-		r.Use(middleware.RealIP)
+		r.Use(middleware.ClientIPFromXFFTrustedProxies(1))
+	} else {
+		r.Use(middleware.ClientIPFromRemoteAddr)
 	}
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Recoverer)
