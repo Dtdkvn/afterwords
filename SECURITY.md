@@ -50,6 +50,12 @@ v0.1 reduces, but cannot remove, this risk:
 
 For high-assurance use, build from reviewed source, pin the binary checksum in configuration management, and keep Recovery Kits offline. A signed, single-file offline recipient bundle is a planned mitigation, not a v0.1 claim.
 
+## Secure-context requirement
+
+Browsers expose `crypto.subtle` only in a secure context, so every vault and recovery operation requires that Afterwords be reached over HTTPS or through a loopback origin (`http://localhost`, `http://127.0.0.1`). The default Compose quick start publishes to loopback and therefore qualifies.
+
+Reaching an instance over plain HTTP on any other host leaves the browser without the Web Crypto API. Afterwords detects this at startup and refuses with an explanation rather than appearing to encrypt; owners and recipients are never offered a flow that would store unencrypted content. Serve remote access through a TLS-terminating reverse proxy with `BASE_URL=https://…` and `SECURE_COOKIES=true`.
+
 ## Server and database compromise
 
 An attacker who obtains the database can learn metadata, crack weak account passwords offline, reuse unexpired sessions/tokens, delete or delay releases, replace ciphertext, and deny service. AES-GCM detects ciphertext modification during decryption, but it cannot guarantee availability or freshness. The attacker does not obtain the vault passphrase, DK, shares, or plaintext from the database alone.

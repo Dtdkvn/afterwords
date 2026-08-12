@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  checkCryptoSupport,
   combineDataKey,
   decryptVaultItem,
   encryptVaultContent,
@@ -40,5 +41,29 @@ describe('Afterwords client cryptography', () => {
     const [share] = await splitDataKey(dataKey, 1, 1)
     expect(share).toMatch(/^aw1\.s\./u)
     await expect(combineDataKey([share], 1)).resolves.toEqual(dataKey)
+  })
+
+  describe('secure-context detection', () => {
+    it('accepts a secure context that exposes Web Crypto', () => {
+      expect(checkCryptoSupport()).toEqual({ supported: true })
+    })
+
+    it('refuses an insecure origin instead of failing silently', () => {
+      const verdict = checkCryptoSupport({ isSecureContext: false, crypto } as Partial<Window>)
+      expect(verdict.supported).toBe(false)
+      if (verdict.supported) throw new Error('expected an unsupported verdict')
+      expect(verdict.reason).toMatch(/secure context/iu)
+      expect(verdict.reason).toMatch(/localhost|127\.0\.0\.1/u)
+    })
+
+    it('refuses a browser without crypto.subtle', () => {
+      const verdict = checkCryptoSupport({
+        isSecureContext: true,
+        crypto: { getRandomValues: crypto.getRandomValues.bind(crypto) },
+      } as unknown as Partial<Window>)
+      expect(verdict.supported).toBe(false)
+      if (verdict.supported) throw new Error('expected an unsupported verdict')
+      expect(verdict.reason).toMatch(/Web Crypto API/u)
+    })
   })
 })

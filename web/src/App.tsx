@@ -6,6 +6,7 @@ import { Brand, Spinner } from './components/Brand'
 import { RecoveryKit } from './components/RecoveryKit'
 import { RecipientPage } from './components/RecipientPage'
 import { Dashboard } from './components/Dashboard'
+import { checkCryptoSupport } from './lib/crypto'
 
 function initialDarkMode() {
   const stored = localStorage.getItem('afterwords-theme')
@@ -13,6 +14,7 @@ function initialDarkMode() {
 }
 
 export default function App() {
+  const [cryptoSupport] = useState(checkCryptoSupport)
   const [dark, setDark] = useState(initialDarkMode)
   const [loading, setLoading] = useState(true)
   const [setupRequired, setSetupRequired] = useState(false)
@@ -43,6 +45,16 @@ export default function App() {
       .finally(() => setLoading(false))
   }, [path])
 
+  if (!cryptoSupport.supported) {
+    return (
+      <main className="loading-screen">
+        <Brand />
+        <h1>Afterwords needs a secure connection.</h1>
+        <p>{cryptoSupport.reason}</p>
+        <p>Your data is safe. Nothing was sent anywhere, because Afterwords encrypts in your browser before anything leaves it.</p>
+      </main>
+    )
+  }
   if (path === '/kit') return <RecoveryKit />
   if (releaseMatch) return <RecipientPage token={decodeURIComponent(releaseMatch[1])} dark={dark} onTheme={() => setDark(!dark)} />
   if (loading) return <main className="loading-screen"><Brand /><Spinner label="Waking up gently" /></main>

@@ -31,6 +31,8 @@ This local checkout is prepared for the expected publication path `https://githu
 
 Open [http://localhost:8080](http://localhost:8080), create the single owner account, and follow the setup wizard. The SQLite database lives in the `afterwords-data` Docker volume.
 
+> **Reach Afterwords over `localhost` or HTTPS.** All encryption happens in your browser through the Web Crypto API, which browsers expose only in a secure context. `http://localhost:8080` and `http://127.0.0.1:8080` qualify, so the default quick start works as written. Browsing to a plain-HTTP LAN address such as `http://192.168.1.10:8080` does not, and Afterwords will say so instead of pretending to encrypt. To reach it from another machine, terminate TLS at a reverse proxy and set `BASE_URL=https://…` with `SECURE_COOKIES=true`.
+
 The default stack starts without a real SMTP server. Configure the `SMTP_*` variables before relying on reminders or releases; use the bundled Mailpit demo for a fully local test.
 
 On a development network that inspects TLS, pass its trusted root to BuildKit as a secret instead of copying it into the image or repository:

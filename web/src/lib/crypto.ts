@@ -13,6 +13,31 @@ const encoder = new TextEncoder()
 const decoder = new TextDecoder('utf-8', { fatal: true })
 const ownerWrapAAD = encoder.encode('afterwords:owner-key:v1')
 
+export type CryptoSupport = { supported: true } | { supported: false; reason: string }
+
+/**
+ * Browsers expose crypto.subtle only in a secure context, so plain HTTP on a
+ * non-loopback host silently removes every primitive the vault depends on.
+ * Callers must surface this before offering to encrypt or decrypt anything.
+ */
+export function checkCryptoSupport(scope: Partial<Window> = globalThis as unknown as Window): CryptoSupport {
+  if (scope.isSecureContext === false) {
+    return {
+      supported: false,
+      reason:
+        'This page is not running in a secure context, so your browser has disabled the Web Crypto API. Open Afterwords over HTTPS, or through http://localhost or http://127.0.0.1, and nothing will need to change on the server.',
+    }
+  }
+  if (!scope.crypto?.subtle || typeof scope.crypto.getRandomValues !== 'function') {
+    return {
+      supported: false,
+      reason:
+        'This browser does not expose the Web Crypto API that Afterwords needs to encrypt and decrypt in the browser. Please use a current version of Firefox, Chrome, Edge, or Safari.',
+    }
+  }
+  return { supported: true }
+}
+
 export function randomBytes(length: number): Uint8Array {
   return crypto.getRandomValues(new Uint8Array(length))
 }
