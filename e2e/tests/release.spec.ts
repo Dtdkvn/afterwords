@@ -67,9 +67,52 @@ test('owner to Recovery Kits to recipient plaintext @demo', async ({ page, conte
   const recipientPage = await context.newPage()
   await recipientPage.goto(releaseURL.startsWith('http') ? releaseURL : new URL(releaseURL, baseURL).toString())
   await expect(recipientPage.getByText('Someone who cared about you')).toBeVisible()
+
+  await recipientPage.getByTestId('release-shares').fill('aw1.not-a-share-from-this-release')
+  await recipientPage.getByTestId('open-release').click()
+  await expect(recipientPage.getByRole('alert')).toContainText('does not belong to this release')
+
+  await recipientPage.getByTestId('release-shares').fill(`${shares[0]}\n${shares[0]}`)
+  await recipientPage.getByTestId('open-release').click()
+  await expect(recipientPage.getByRole('alert')).toContainText('1 more valid share is needed')
+
   await recipientPage.getByTestId('release-shares').fill(shares.join('\n'))
   await recipientPage.getByTestId('open-release').click()
   await expect(recipientPage.getByTestId('decrypted-message')).toContainText('you were loved, every day')
+})
+
+test('pause, resume, and fire drill preserve the real switch state', async ({ page, context }) => {
+  await page.goto('/')
+  await authenticate(page)
+  const uniqueName = `State controls ${Date.now()}`
+  const created = await browserAPI<{ switch: { id: string } }>(page, '/api/switches', {
+    method: 'POST',
+    json: { name: uniqueName, intervalDays: 30, graceDays: 5, reminders: { beforeDays: [3, 1], overdueDays: [0, 1, 2] } },
+  })
+  expect(created.status).toBe(201)
+  const switchID = created.body.switch.id
+  await page.reload()
+
+  const card = page.locator('article.switch-card').filter({ hasText: uniqueName })
+  await expect(card).toBeVisible()
+  await card.getByRole('button', { name: 'Pause' }).click()
+  await expect(card.locator('.state-badge')).toHaveText('PAUSED')
+  await card.getByRole('button', { name: 'Resume' }).click()
+  await expect(card.locator('.state-badge')).toHaveText('ACTIVE')
+
+  const before = await browserAPI<{ switch: { state: string; nextDeadline: string } }>(page, `/api/switches/${switchID}`)
+  const popupPromise = context.waitForEvent('page')
+  await card.getByRole('button', { name: 'Switch options' }).click()
+  await card.getByRole('button', { name: 'Run fire drill' }).click()
+  const rehearsal = await popupPromise
+  await expect(rehearsal.getByText('Safe rehearsal:')).toBeVisible()
+  await expect(rehearsal.getByText('Someone who cared about you')).toBeVisible()
+
+  const after = await browserAPI<{ switch: { state: string; nextDeadline: string } }>(page, `/api/switches/${switchID}`)
+  expect(after.body.switch.state).toBe(before.body.switch.state)
+  expect(after.body.switch.nextDeadline).toBe(before.body.switch.nextDeadline)
+  const audit = await browserAPI<{ entries: Array<{ event: string }> }>(page, `/api/switches/${switchID}/audit`)
+  expect(audit.body.entries.map((entry) => entry.event)).toEqual(expect.arrayContaining(['switch.paused', 'switch.resumed', 'fire_drill.started', 'email.queued']))
 })
 
 async function authenticate(page: Page) {
@@ -80,6 +123,20 @@ async function authenticate(page: Page) {
   await page.getByTestId('auth-password').fill(ownerPassword)
   await page.getByTestId('auth-submit').click()
   await expect(page.getByText('Good to see you.')).toBeVisible()
+}
+
+async function browserAPI<T>(page: Page, path: string, options: { method?: string; json?: unknown } = {}): Promise<{ status: number; body: T }> {
+  return page.evaluate(async ({ requestPath, method, json }) => {
+    const bootstrap = await fetch('/api/bootstrap', { credentials: 'same-origin' })
+    const credentials = await bootstrap.json() as { csrfToken?: string }
+    const response = await fetch(requestPath, {
+      method: method ?? 'GET',
+      credentials: 'same-origin',
+      headers: json === undefined ? undefined : { 'Content-Type': 'application/json', 'X-CSRF-Token': credentials.csrfToken ?? '' },
+      body: json === undefined ? undefined : JSON.stringify(json),
+    })
+    return { status: response.status, body: await response.json() as T }
+  }, { requestPath: path, method: options.method, json: options.json })
 }
 
 async function releaseURLFromMailpit(request: import('@playwright/test').APIRequestContext, mailpitURL: string, recipient: string): Promise<string> {
