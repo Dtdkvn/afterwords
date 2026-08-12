@@ -157,6 +157,9 @@ func TestMarkMessageFailedDeadLettersExactlyOnce(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if len(entries) < 2 || entries[0].Event != "email.requeued" || entries[1].Event != "email.dead_lettered" {
+		t.Fatalf("same-timestamp delivery events are not newest first: %#v", entries)
+	}
 	requeued := 0
 	for _, entry := range entries {
 		if entry.Event == "email.requeued" {

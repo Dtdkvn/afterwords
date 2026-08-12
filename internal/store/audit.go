@@ -47,7 +47,7 @@ func (s *Store) ListAudit(ctx context.Context, userID, switchID string, limit in
 		limit = 100
 	}
 	rows, err := s.db.QueryContext(ctx, `SELECT id,switch_id,event,meta_json,created_at FROM audit_log
-      WHERE switch_id=? ORDER BY created_at DESC LIMIT ?`, switchID, limit)
+      WHERE switch_id=? ORDER BY created_at DESC,rowid DESC LIMIT ?`, switchID, limit)
 	if err != nil {
 		return nil, err
 	}
