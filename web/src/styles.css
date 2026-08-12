@@ -9,10 +9,13 @@
   --surface: rgba(255, 253, 249, 0.92);
   --surface-solid: #fffdf9;
   --ink: #20302b;
-  --muted: #69736f;
-  /* Meets WCAG AA (4.5:1) for small secondary text sitting on --paper-deep. */
-  --muted-strong: #565f5b;
+  /* Secondary text. Clears WCAG AA (4.5:1) on both --paper and --paper-deep;
+     the previous #69736f measured 4.35:1 and 3.91:1 respectively. */
+  --muted: #565f5b;
   --line: rgba(32, 48, 43, 0.13);
+  /* Text placed on an accent fill. Light mode paints on a dark teal, dark mode
+     on a pale mint, so the two modes need opposite polarity. */
+  --on-accent: #fffdf9;
   --moss: #2f766d;
   --moss-deep: #245f58;
   --moss-soft: #d9e8e3;
@@ -30,8 +33,8 @@
   --surface-solid: #1b2723;
   --ink: #edf3ef;
   --muted: #a5b0ac;
-  --muted-strong: #b9c3bf;
   --line: rgba(237, 243, 239, 0.13);
+  --on-accent: #17221f;
   --moss: #72b8ab;
   --moss-deep: #8ac9bd;
   --moss-soft: #203d37;
@@ -66,13 +69,13 @@ a { color: inherit; }
 .fine-print { color: var(--muted); font-size: 12px; line-height: 1.55; }
 
 .primary-button, .secondary-button, .ghost-button, .alive-button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 44px; padding: 11px 17px; border-radius: 999px; border: 1px solid transparent; font-size: 14px; font-weight: 750; text-decoration: none; cursor: pointer; transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease; }
-.primary-button { color: #fff; background: var(--moss-deep); box-shadow: 0 10px 25px rgba(47, 118, 109, .2); }
+.primary-button { color: var(--on-accent); background: var(--moss-deep); box-shadow: 0 10px 25px rgba(47, 118, 109, .2); }
 .primary-button:hover, .alive-button:hover { transform: translateY(-1px); box-shadow: 0 13px 30px rgba(47, 118, 109, .3); }
 .secondary-button { border-color: var(--line); background: var(--surface-solid); }
 .secondary-button:hover { border-color: var(--moss); color: var(--moss); }
 .ghost-button { background: transparent; color: var(--muted); }
 .ghost-button:hover { background: var(--paper-deep); color: var(--ink); }
-.alive-button { min-height: 50px; background: var(--moss-deep); color: #fff; font-size: 15px; box-shadow: 0 10px 25px rgba(47, 118, 109, .2); }
+.alive-button { min-height: 50px; background: var(--moss-deep); color: var(--on-accent); font-size: 15px; box-shadow: 0 10px 25px rgba(47, 118, 109, .2); }
 .primary-button:disabled, .secondary-button:disabled, .alive-button:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
 .full-button { width: 100%; }
 .icon-button { display: inline-grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); cursor: pointer; transition: background .18s, color .18s; }
@@ -202,7 +205,7 @@ textarea { resize: vertical; line-height: 1.6; }
 .wizard-header h2 { margin: 0; font: 700 32px/1.1 Georgia, serif; }
 .stepper { display: flex; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .stepper li { display: grid; place-items: center; width: 29px; height: 29px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); font-size: 11px; font-weight: 800; }
-.stepper li.active { border-color: var(--moss); background: var(--moss); color: #fff; box-shadow: 0 0 0 5px var(--moss-soft); }
+.stepper li.active { border-color: var(--moss); background: var(--moss); color: var(--on-accent); box-shadow: 0 0 0 5px var(--moss-soft); }
 .stepper li.done { border-color: var(--moss); color: var(--moss); }
 .stepper svg { width: 15px; }
 .wizard-body { padding: 34px 38px 38px; }
@@ -372,7 +375,7 @@ textarea { resize: vertical; line-height: 1.6; }
 .release-steps li small { margin-top: 3px; color: var(--muted); font-size: 10px; }
 .trustee-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
 .trustee-chips span { display: grid; padding: 7px 10px; border-radius: 9px; background: var(--paper-deep); font-size: 11px; font-weight: 700; }
-.trustee-chips small { color: var(--muted-strong); font-size: 9px; font-weight: 600; }
+.trustee-chips small { color: var(--muted); font-size: 9px; font-weight: 600; }
 .share-input { display: grid; gap: 8px; }
 .share-input textarea { font: 10px/1.5 ui-monospace, monospace; }
 .share-file-button { position: relative; display: flex; align-items: center; gap: 7px; margin-top: 9px; padding: 9px 11px; border: 1px dashed var(--line); border-radius: 10px; color: var(--moss); font-size: 11px; font-weight: 700; cursor: pointer; }
